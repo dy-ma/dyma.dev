@@ -8,10 +8,10 @@ fi
 
 magick "$1" \
   -auto-orient \
-  -resize '1440x1440>' \
+  -resize '900x900>' \
   -colorspace Gray \
-  -contrast-stretch '1%x1%' \
-  -ordered-dither 'o8x8,4' \
+  -contrast-stretch '2%x2%' \
+  -ordered-dither 'o8x8,3' \
   -define png:color-type=0 \
   -strip \
   "$2"

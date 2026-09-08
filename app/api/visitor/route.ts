@@ -1,71 +1,22 @@
 import { env } from 'cloudflare:workers';
+import {
+  createVisitorCookie,
+  readVisitorCookie,
+  VISITOR_COOKIE_MAX_AGE,
+  VISITOR_COOKIE_NAME,
+} from '@/lib/visitor-cookie';
 
-const COOKIE_NAME = 'dylan_visitor';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 const DAY = 1000 * 60 * 60 * 24;
-
-function bytesToBase64Url(bytes: Uint8Array) {
-  let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary)
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-    .replaceAll('=', '');
-}
-
-async function signature(value: string, secret: string) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-  const signed = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(value),
-  );
-  return bytesToBase64Url(new Uint8Array(signed));
-}
-
-function constantTimeEqual(left: string, right: string) {
-  if (left.length !== right.length) return false;
-  let difference = 0;
-  for (let index = 0; index < left.length; index += 1) {
-    difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
-  }
-  return difference === 0;
-}
 
 function readCookie(request: Request) {
   const header = request.headers.get('cookie') ?? '';
   const cookie = header
     .split(';')
     .map((part) => part.trim())
-    .find((part) => part.startsWith(`${COOKIE_NAME}=`));
+    .find((part) => part.startsWith(`${VISITOR_COOKIE_NAME}=`));
   return cookie
-    ? decodeURIComponent(cookie.slice(COOKIE_NAME.length + 1))
+    ? decodeURIComponent(cookie.slice(VISITOR_COOKIE_NAME.length + 1))
     : null;
-}
-
-async function readVisitor(request: Request, secret: string) {
-  const cookie = readCookie(request);
-  if (!cookie) return null;
-  const [number, lastVisit, suppliedSignature] = cookie.split('.');
-  if (!number || !lastVisit || !suppliedSignature) return null;
-
-  const expectedSignature = await signature(`${number}.${lastVisit}`, secret);
-  if (!constantTimeEqual(expectedSignature, suppliedSignature)) return null;
-
-  const visitorNumber = Number(number);
-  const lastVisitAt = Number(lastVisit);
-  if (
-    !Number.isSafeInteger(visitorNumber) ||
-    !Number.isSafeInteger(lastVisitAt)
-  )
-    return null;
-  return { visitorNumber, lastVisitAt };
 }
 
 async function ensureCounter() {
@@ -80,7 +31,7 @@ export async function GET(request: Request) {
   const secret =
     env.VISITOR_COOKIE_SECRET || 'local-preview-secret-change-in-production';
   const now = Date.now();
-  const existing = await readVisitor(request, secret);
+  const existing = await readVisitorCookie(readCookie(request), secret);
   let visitorNumber: number;
   let total: number;
 
@@ -102,8 +53,7 @@ export async function GET(request: Request) {
     total = visitorNumber;
   }
 
-  const payload = `${visitorNumber}.${now}`;
-  const token = `${payload}.${await signature(payload, secret)}`;
+  const token = await createVisitorCookie(visitorNumber, now, secret);
   const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
   const response = Response.json({
     visitorNumber,
@@ -115,7 +65,7 @@ export async function GET(request: Request) {
   });
   response.headers.append(
     'Set-Cookie',
-    `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${secure}`,
+    `${VISITOR_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${VISITOR_COOKIE_MAX_AGE}; HttpOnly; SameSite=Lax${secure}`,
   );
   response.headers.set('Cache-Control', 'no-store');
   return response;

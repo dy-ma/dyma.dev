@@ -1,144 +1,97 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { env } from 'cloudflare:workers';
+import { PretextSpread } from '@/components/pretext-spread';
 import { VisitorCounter } from '@/components/visitor-counter';
+import { readVisitorCookie, VISITOR_COOKIE_NAME } from '@/lib/visitor-cookie';
+
+const introduction =
+  'ey, I’m Dylan, a software engineer working on infrastructure at Aina. I work on software systems and the tools used to run them. Most of my work is concerned with how services are deployed, observed, and kept working as they change. This page is a record of some of that work. The three projects below are placeholders for longer accounts of Drop, Fabric, and Redthing. I do not publish very often, so the writing will arrive gradually. For now, this is the short version: I design and operate infrastructure, I care about making systems understandable, and I am usually working somewhere between the application and the machines underneath it.';
 
 const projects = [
   {
     slug: 'drop',
     title: 'Drop',
-    number: '01',
-    description:
-      'A placeholder for a project about moving things from one place to another without making the journey everyone else’s problem.',
+    number: '1',
+    description: 'Project notes and a longer write-up to come.',
   },
   {
     slug: 'fabric',
     title: 'Fabric',
-    number: '02',
-    description:
-      'A placeholder for a project about the connective tissue between systems, teams, and the occasional questionable decision.',
+    number: '2',
+    description: 'Project notes and a longer write-up to come.',
   },
   {
     slug: 'redthing',
     title: 'Redthing',
-    number: '03',
-    description:
-      'A placeholder for the red thing. Its real explanation will be considerably more useful than this one.',
+    number: '3',
+    description: 'Project notes and a longer write-up to come.',
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const secret =
+    env.VISITOR_COOKIE_SECRET || 'local-preview-secret-change-in-production';
+  const visitor = await readVisitorCookie(
+    cookieStore.get(VISITOR_COOKIE_NAME)?.value,
+    secret,
+  );
+
   return (
     <main>
-      <header className="site-header page-shell">
-        <a className="wordmark" href="#top" aria-label="Dylan Mou Ang, home">
-          Dylan Mou Ang
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="#about">About</a>
-          <a href="#work">Work</a>
-          <a href="#contact">Contact</a>
-        </nav>
-      </header>
+      <article className="advertisement page-shell">
+        <VisitorCounter
+          initialReturning={visitor !== null}
+          initialVisitorNumber={visitor?.visitorNumber ?? null}
+        />
 
-      <section
-        id="top"
-        className="hero page-shell"
-        aria-labelledby="hero-title"
-      >
-        <div className="hero-kicker">A small place on the internet</div>
-        <VisitorCounter />
-        <p id="hero-title" className="hero-note">
-          Dylan is a software engineer working on infrastructure at{' '}
-          <a href="https://ainatech.ai" target="_blank" rel="noreferrer">
-            Aina
-          </a>
-          .
-        </p>
-        <a
-          className="scroll-cue"
-          href="#figure"
-          aria-label="Continue to the illustration"
-        >
-          Continue ↓
-        </a>
-      </section>
-
-      <figure id="figure" className="hero-figure reveal">
-        <div className="image-frame">
+        <figure className="ad-figure">
           <Image
             src="/images/pig-field.png"
-            width="1440"
-            height="960"
+            width={900}
+            height={600}
             alt="A pig sitting in an open field, facing away toward the horizon."
-            sizes="(max-width: 760px) 100vw, min(1460px, calc(100vw - 20px))"
+            sizes="(max-width: 760px) calc(100vw - 28px), 820px"
             priority
           />
-        </div>
-        <figcaption className="page-shell">
-          <span>Fig. 01</span>
-          <span>September, somewhere quiet.</span>
-        </figcaption>
-      </figure>
+          <figcaption>Fig. 1</figcaption>
+        </figure>
 
-      <section
-        id="about"
-        className="about page-shell reveal"
-        aria-labelledby="about-title"
-      >
-        <p className="section-label">About</p>
-        <div className="about-grid">
-          <h2 id="about-title">
-            I build the parts you’re not supposed to notice.
-          </h2>
-          <div className="body-copy">
-            <p>
-              I’m Dylan, a software engineer working on infrastructure at Aina.
-              I like systems that are understandable, operable, and boring in
-              the useful sense of the word.
-            </p>
-            <p>
-              The longer version is still being written. It will eventually
-              contain more about the work, the thinking behind it, and several
-              things I would now do differently.
-            </p>
-          </div>
+        <div id="about">
+          <PretextSpread lead="H" text={introduction} />
         </div>
-      </section>
+      </article>
 
       <section
         id="work"
         className="work page-shell"
         aria-labelledby="work-title"
       >
-        <div className="section-heading reveal">
-          <p className="section-label">Selected work</p>
-          <h2 id="work-title">Three things, for now.</h2>
-        </div>
+        <h2 id="work-title">Work</h2>
         <div className="project-list">
           {projects.map((project) => (
             <Link
               key={project.slug}
               href={`/projects/${project.slug}`}
-              className="project-row reveal"
+              className="project-row"
             >
               <span className="project-number">{project.number}</span>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <span className="project-arrow" aria-hidden="true">
-                ↗
+                →
               </span>
             </Link>
           ))}
         </div>
       </section>
 
-      <footer id="contact" className="site-footer page-shell reveal">
-        <div>
-          <p className="section-label">Elsewhere</p>
-          <h2>Say hello, if you like.</h2>
-        </div>
+      <footer id="contact" className="site-footer page-shell">
+        <h2>Contact</h2>
         <div className="contact-links">
-          <a href="mailto:dylanmouang@gmail.com">Email</a>
+          <a href="mailto:dylanmouang@gmail.com">dylanmouang@gmail.com</a>
           <a
             href="https://www.linkedin.com/in/dylan-mou-ang"
             target="_blank"
@@ -153,10 +106,7 @@ export default function Home() {
             Twitter
           </a>
         </div>
-        <div className="colophon">
-          <span>Set in EB Garamond and IBM Plex Mono.</span>
-          <span>Built with an unreasonable amount of care.</span>
-        </div>
+        <p className="colophon">Dylan Mou Ang</p>
       </footer>
     </main>
   );

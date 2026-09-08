@@ -1,5 +1,6 @@
 'use client';
 
+import NumberFlow, { continuous } from '@number-flow/react';
 import { useEffect, useState } from 'react';
 
 type Visitor = {
@@ -9,23 +10,60 @@ type Visitor = {
   lastVisitDays: number | null;
 };
 
-function lastSeen(days: number | null) {
-  if (days === null) return '';
-  if (days === 0) return 'You were last here earlier today.';
-  if (days === 1) return 'You were last here yesterday.';
-  return `You were last here ${days.toLocaleString('en-US')} days ago.`;
+type CounterState = {
+  target: number | null;
+  value: number | null;
+};
+
+const NUMBER_FLOW_PLUGINS = [continuous];
+const NUMBER_FORMAT = { useGrouping: true };
+const NUMBER_FLOW_TRANSFORM_TIMING = {
+  duration: 480,
+  easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+};
+const NUMBER_FLOW_SPIN_TIMING = {
+  duration: 520,
+  easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+};
+const NUMBER_FLOW_OPACITY_TIMING = {
+  duration: 220,
+  easing: 'ease-out',
+};
+
+function startingValue(target: number) {
+  const firstAtThisLength = target < 10 ? 0 : 10 ** (String(target).length - 1);
+  return Math.max(firstAtThisLength, target - 2);
 }
 
-export function VisitorCounter() {
+function lastSeen(days: number | null) {
+  if (days === null) return '';
+  if (days === 0) return 'You last visited earlier today.';
+  if (days === 1) return 'You last visited yesterday.';
+  return `You last visited ${days.toLocaleString('en-US')} days ago.`;
+}
+
+export function VisitorCounter({
+  initialReturning,
+  initialVisitorNumber,
+}: {
+  initialReturning: boolean;
+  initialVisitorNumber: number | null;
+}) {
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const [unavailable, setUnavailable] = useState(false);
+  const targetNumber = visitor?.visitorNumber ?? initialVisitorNumber;
+  const returning = visitor?.returning ?? initialReturning;
+  const [counter, setCounter] = useState<CounterState>(() => ({
+    target: targetNumber,
+    value: targetNumber === null ? null : startingValue(targetNumber),
+  }));
 
   useEffect(() => {
     const controller = new AbortController();
 
     fetch('/api/visitor', { signal: controller.signal })
       .then((response) => {
-        if (!response.ok) throw new Error('Visitor desk unavailable');
+        if (!response.ok) throw new Error('Visitor count unavailable');
         return response.json() as Promise<Visitor>;
       })
       .then(setVisitor)
@@ -37,23 +75,73 @@ export function VisitorCounter() {
     return () => controller.abort();
   }, []);
 
-  const number = visitor?.visitorNumber.toLocaleString('en-US') ?? '…';
+  useEffect(() => {
+    if (targetNumber === null) return;
+
+    const timer = window.setTimeout(() => {
+      setCounter({
+        target: targetNumber,
+        value: targetNumber,
+      });
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [targetNumber]);
+
+  const finalNumber = targetNumber?.toLocaleString('en-US') ?? '';
+  const displayedNumber =
+    counter.target === targetNumber
+      ? counter.value
+      : targetNumber === null
+        ? null
+        : startingValue(targetNumber);
 
   return (
-    <div aria-live="polite" aria-atomic="true">
+    <header className="ad-heading" aria-live="polite" aria-atomic="true">
       <h1 className="visitor-heading">
-        Welcome{visitor?.returning ? ' back' : ''}, visitor{' '}
-        <span className="counter-number">{number}</span>.
+        Welcome{returning ? ' back' : ''}, visitor{' '}
+        <span
+          className="counter-slot"
+          aria-label={
+            targetNumber === null
+              ? unavailable
+                ? 'unavailable'
+                : 'loading'
+              : finalNumber
+          }
+        >
+          {targetNumber === null ? (
+            <span className="counter-fallback" aria-hidden="true">
+              {unavailable ? '—' : '0'}
+            </span>
+          ) : (
+            <NumberFlow
+              aria-hidden="true"
+              className="visitor-number"
+              format={NUMBER_FORMAT}
+              isolate
+              locales="en-US"
+              opacityTiming={NUMBER_FLOW_OPACITY_TIMING}
+              plugins={NUMBER_FLOW_PLUGINS}
+              spinTiming={NUMBER_FLOW_SPIN_TIMING}
+              transformTiming={NUMBER_FLOW_TRANSFORM_TIMING}
+              trend={1}
+              value={displayedNumber ?? targetNumber}
+              willChange
+            />
+          )}
+        </span>
+        {'.'}
       </h1>
       <p className="visitor-detail">
         {visitor
-          ? visitor.returning
-            ? `We’re up to ${visitor.total.toLocaleString('en-US')} now. ${lastSeen(visitor.lastVisitDays)}`
-            : 'You’re the newest one.'
+          ? `${visitor.total.toLocaleString('en-US')} visitors so far.${
+              visitor.returning ? ` ${lastSeen(visitor.lastVisitDays)}` : ''
+            }`
           : unavailable
-            ? 'The front desk is momentarily unattended.'
-            : 'Checking the guest book…'}
+            ? 'The visitor count is unavailable.'
+            : 'Counting visitors…'}
       </p>
-    </div>
+    </header>
   );
 }
