@@ -22,7 +22,7 @@ export default function ArticlesPage() {
 
       <header className="mt-[clamp(42px,7vw,82px)] border-y-4 border-double border-ink py-[clamp(20px,3vw,34px)] text-center">
         <p className="my-[0.55rem] text-[0.9rem] italic">The complete index</p>
-        <h1 className="text-[clamp(4.2rem,10vw,8.6rem)] leading-[0.82] font-light tracking-[-0.055em]">
+        <h1 className="text-[clamp(4.2rem,10vw,8.6rem)] leading-[0.82] font-light tracking-[-0.055em] max-[760px]:font-normal">
           All articles
         </h1>
       </header>

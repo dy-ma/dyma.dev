@@ -156,7 +156,7 @@ export function NewspaperStory({
             'columns-2 gap-[clamp(20px,3vw,34px)] max-[540px]:columns-1',
           !isArchive &&
             article.homeTreatment === 'full' &&
-            'columns-2 gap-[clamp(20px,3vw,34px)] [column-rule:none] max-[540px]:columns-1',
+            "relative max-h-[18rem] columns-2 gap-[clamp(20px,3vw,34px)] overflow-hidden [column-rule:none] after:absolute after:right-0 after:bottom-0 after:h-[3.2rem] after:w-full after:bg-[linear-gradient(to_bottom,transparent,#fff_82%)] after:content-[''] max-[540px]:max-h-[13.5rem] max-[540px]:columns-1",
           !isArchive &&
             article.homeTreatment === 'excerpt' &&
             "relative max-h-[15.1rem] overflow-hidden [column-rule:1px_solid_rgb(17_17_17_/_42%)] after:absolute after:right-0 after:bottom-0 after:h-[2.8rem] after:w-full after:bg-[linear-gradient(to_bottom,transparent,#fff_82%)] after:content-[''] max-[540px]:max-h-48",

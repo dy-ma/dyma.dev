@@ -24,6 +24,11 @@ type VisitResponse = {
   returning: boolean;
 };
 
+type VisitorEnv = {
+  VISITOR_COOKIE_SECRET?: string;
+  VISITOR_COUNTER_DO: DurableObjectNamespace;
+};
+
 function sanitizeVisitorNumber(value: unknown): number | null {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0)
     return null;
@@ -48,32 +53,36 @@ export class VisitorCounterDurableObject {
       });
     }
 
-    const { visitorNumber: incomingVisitorNumber } = await request
+    const { visitorNumber: incomingVisitorNumber } = (await request
       .json()
-      .catch((): VisitRequest => ({}));
+      .catch(() => ({}))) as VisitRequest;
     const existingVisitorNumber = sanitizeVisitorNumber(incomingVisitorNumber);
 
-    const previousTotal = (await this.state.storage.get<number>(TOTAL_VISITORS_KEY)) ?? 0;
+    const previousTotal =
+      (await this.state.storage.get<number>(TOTAL_VISITORS_KEY)) ?? 0;
     const now = Date.now();
     const threshold = now - ACTIVE_VISITOR_TTL_MS;
 
-    const activeVisitorEntries = await this.state.storage.list<{ lastSeen: number }>(
-      { prefix: ACTIVE_VISITOR_PREFIX },
-    );
+    const activeVisitorEntries = await this.state.storage.list<{
+      lastSeen: number;
+    }>({ prefix: ACTIVE_VISITOR_PREFIX });
 
     const staleKeys: string[] = [];
-    let currentVisitors = 0;
+    const activeVisitorKeys = new Set<string>();
     for (const [key, value] of activeVisitorEntries) {
-      if (!value || typeof value.lastSeen !== 'number' || value.lastSeen < threshold) {
+      if (
+        !value ||
+        typeof value.lastSeen !== 'number' ||
+        value.lastSeen < threshold
+      ) {
         staleKeys.push(key);
       } else {
-        currentVisitors += 1;
+        activeVisitorKeys.add(key);
       }
     }
 
     if (staleKeys.length > 0) {
       await this.state.storage.delete(staleKeys);
-      currentVisitors -= staleKeys.length;
     }
 
     let visitorNumber: number;
@@ -92,8 +101,13 @@ export class VisitorCounterDurableObject {
       }
     }
 
-    currentVisitors += 1;
-    await this.state.storage.put(ACTIVE_VISITOR_PREFIX + String(visitorNumber), {
+    const activeVisitorKey = ACTIVE_VISITOR_PREFIX + String(visitorNumber);
+    const currentVisitors = Math.max(
+      1,
+      activeVisitorKeys.size +
+        (activeVisitorKeys.has(activeVisitorKey) ? 0 : 1),
+    );
+    await this.state.storage.put(activeVisitorKey, {
       lastSeen: now,
     });
     await this.state.storage.put(TOTAL_VISITORS_KEY, total);
@@ -122,12 +136,14 @@ function readCookie(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const visitorEnv = env as unknown as VisitorEnv;
   const secret =
-    env.VISITOR_COOKIE_SECRET || 'local-preview-secret-change-in-production';
+    visitorEnv.VISITOR_COOKIE_SECRET ||
+    'local-preview-secret-change-in-production';
   const now = Date.now();
   const existing = await readVisitorCookie(readCookie(request), secret);
-  const visitorResponse = await env.VISITOR_COUNTER_DO.get(
-    env.VISITOR_COUNTER_DO.idFromName(VISITOR_DO_ID),
+  const visitorResponse = await visitorEnv.VISITOR_COUNTER_DO.get(
+    visitorEnv.VISITOR_COUNTER_DO.idFromName(VISITOR_DO_ID),
   ).fetch(
     new Request('http://local.visitor-counter-do/api/visitor', {
       method: 'POST',

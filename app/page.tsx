@@ -65,7 +65,7 @@ export default async function Home() {
         <header className="py-[clamp(12px,1.8vw,20px)] pb-[clamp(10px,1.2vw,16px)] text-center max-[540px]:pt-4 max-[540px]:pb-[13px]">
           <h2
             id="work-title"
-            className="mx-auto max-w-[14ch] text-[clamp(3.2rem,7vw,6.4rem)] leading-[0.82] font-light tracking-[-0.055em] max-[540px]:text-[clamp(2.85rem,15vw,4.25rem)]"
+            className="mx-auto max-w-[14ch] text-[clamp(3.2rem,7vw,6.4rem)] leading-[0.82] font-light tracking-[-0.055em] max-[540px]:text-[clamp(2.85rem,15vw,4.25rem)] max-[540px]:font-normal"
           >
             What I’ve been up to
           </h2>

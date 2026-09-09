@@ -16,7 +16,7 @@ export function SiteFooter() {
         <div className="w-full border-t border-rule pt-[clamp(8px,1.5vw,12px)]">
           <p
             id="contact-title"
-            className="text-[clamp(1.9rem,5vw,2.7rem)] leading-none font-light tracking-[-0.04em]"
+            className="text-[clamp(1.9rem,5vw,2.7rem)] leading-none font-light tracking-[-0.04em] max-[760px]:font-normal"
           >
             Contact
           </p>

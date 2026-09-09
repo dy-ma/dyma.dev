@@ -53,7 +53,7 @@ export default async function ArticlePage({
         <p className="mt-[clamp(68px,10vw,118px)] mb-3 text-[0.86rem] tracking-[0.1em] [font-variant:small-caps]">
           {article.project}
         </p>
-        <h1 className="text-[clamp(4.5rem,13vw,9rem)] leading-[0.82] font-light tracking-[-0.05em]">
+        <h1 className="text-[clamp(4.5rem,13vw,9rem)] leading-[0.82] font-light tracking-[-0.05em] max-[679px]:font-normal">
           {article.headline}
         </h1>
         {article.date ? (
@@ -83,7 +83,7 @@ export default async function ArticlePage({
         </figure>
       ) : null}
       <article
-        className={`${articleShellClassName} columns-1 gap-0 border-t border-rule py-[clamp(80px,12vw,160px)] text-[22px] leading-[1.36] max-[679px]:text-[1.15rem] max-[679px]:leading-[1.5] [&>*]:mx-auto [&>*]:max-w-[680px] [&_p]:[break-inside:avoid] [&_p]:text-justify [&_p]:[text-align-last:auto] [&_p]:[text-justify:inter-word] [&_h2]:mt-[3em] [&_h2]:mb-[0.6em] [&_h2]:text-[clamp(2.5rem,4vw,3.75rem)] [&_h2]:leading-[0.95] [&_h2]:font-light [&_h2]:tracking-[-0.025em] [&_h2]:[break-after:avoid] [&_blockquote]:!my-[3em] [&_blockquote]:!max-w-[820px] [&_blockquote]:border-l [&_blockquote]:border-rule [&_blockquote]:py-[0.35em] [&_blockquote]:pr-0 [&_blockquote]:pl-[1em] [&_blockquote]:text-[1.5em] [&_blockquote]:leading-[1.18] [&_code]:font-mono [&_code]:text-[0.82em] [&_img]:my-[1.25em] [&_img]:block [&_img]:h-auto [&_img]:max-w-full`}
+        className={`${articleShellClassName} columns-1 gap-0 border-t border-rule py-[clamp(80px,12vw,160px)] text-[22px] leading-[1.36] max-[679px]:text-[1.15rem] max-[679px]:leading-[1.5] [&>*]:mx-auto [&>*]:max-w-[680px] [&_p]:[break-inside:avoid] [&_p]:text-justify [&_p]:[text-align-last:auto] [&_p]:[text-justify:inter-word] [&_h2]:mt-[3em] [&_h2]:mb-[0.6em] [&_h2]:text-[clamp(2.5rem,4vw,3.75rem)] [&_h2]:leading-[0.95] [&_h2]:font-light [&_h2]:tracking-[-0.025em] [&_h2]:[break-after:avoid] max-[679px]:[&_h2]:font-normal [&_blockquote]:!my-[3em] [&_blockquote]:!max-w-[820px] [&_blockquote]:border-l [&_blockquote]:border-rule [&_blockquote]:py-[0.35em] [&_blockquote]:pr-0 [&_blockquote]:pl-[1em] [&_blockquote]:text-[1.5em] [&_blockquote]:leading-[1.18] [&_code]:font-mono [&_code]:text-[0.82em] [&_img]:my-[1.25em] [&_img]:block [&_img]:h-auto [&_img]:max-w-full`}
       >
         {opening ? <ArticlePretextDropCap text={opening} /> : null}
         {rest ? <ReactMarkdown>{rest}</ReactMarkdown> : null}
