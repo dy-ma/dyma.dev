@@ -6,6 +6,7 @@ import { defineConfig } from 'vite';
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
 
 const localBindingConfig = {
+  name: 'portfolio',
   main: './server/visitor-counter-worker.ts',
   compatibility_flags: ['nodejs_compat'],
   durable_objects: {
@@ -16,7 +17,9 @@ const localBindingConfig = {
       },
     ],
   },
-  migrations: [{ tag: 'v1', new_classes: ['VisitorCounterDurableObject'] }],
+  migrations: [
+    { tag: 'v1', new_sqlite_classes: ['VisitorCounterDurableObject'] },
+  ],
   r2_buckets: [],
 };
 
