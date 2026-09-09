@@ -1,5 +1,5 @@
 {
-  "name": "portfolio",
+  "name": "dyma.dev",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.18.0",
@@ -7,36 +7,17 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "check": "astro check",
-    "preview": "astro preview",
-    "start": "WRANGLER_LOG_PATH=.wrangler/logs MINIFLARE_REGISTRY_PATH=.wrangler/registry wrangler dev",
-    "deploy": "pnpm run build && WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy",
-    "cf-typegen": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types",
-    "lint": "oxlint src astro.config.mjs",
-    "format": "oxfmt",
-    "image:dither": "scripts/dither-image.sh"
-  },
-  "dependencies": {
-    "@astrojs/cloudflare": "14.3.1",
-    "@astrojs/react": "6.0.5",
-    "@number-flow/react": "^0.6.2",
-    "astro": "7.3.2",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "preview": "pnpm --filter @dyma/site preview",
+    "deploy:presence": "pnpm --filter @dyma/presence deploy",
+    "cf-typegen": "pnpm --filter @dyma/presence cf-typegen",
+    "image:dither": "pnpm --filter @dyma/site image:dither"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
-    "@tailwindcss/vite": "4.3.3",
-    "@types/node": "22.19.19",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "oxfmt": "0.61.0",
-    "oxlint": "1.76.0",
-    "tailwindcss": "4.3.3",
-    "typescript": "5.9.3",
-    "wrangler": "4.130.0"
-  },
-  "type": "module"
+    "turbo": "2.10.12"
+  }
 }

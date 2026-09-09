@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { formatArticleDate, getArticles, type Article } from '@/lib/articles';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const date = formatArticleDate(article.data.date);
+const articleShellClassName =
+  'mx-auto w-[min(calc(100%_-_40px),900px)] max-[760px]:w-[min(calc(100%_-_28px),100%)]';
+---
+
+<SiteLayout
+  title={`${article.data.headline} — Dylan Mou Ang`}
+  description={article.data.summary}
+  noIndex={!article.data.published}
+>
+  <main class="article-page">
+    <header class={`${articleShellClassName} flex flex-col pt-7 pb-[clamp(44px,7vw,72px)]`}>
+      <nav class="text-[1.08rem]" aria-label="Article navigation">
+        <a
+          class="underline-offset-[0.17em] focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-ink"
+          href="/#work"
+        >
+          ← Front page
+        </a>
+      </nav>
+      <p class="mt-[clamp(68px,10vw,118px)] mb-3 text-[0.95rem] tracking-[0.1em] [font-variant:small-caps]">
+        {article.data.project}
+      </p>
+      <h1 class="text-[clamp(4.5rem,13vw,9rem)] leading-[0.82] font-light tracking-[-0.05em] max-[679px]:font-normal">
+        {article.data.headline}
+      </h1>
+      {date && <div class="mt-[50px] border-t border-rule pt-3 text-[1rem]">{date}</div>}
+    </header>
+
+    {
+      article.data.image && (
+        <figure class={`${articleShellClassName} mb-0 pb-[clamp(44px,7vw,80px)]`}>
+          <Image
+            class="block h-auto w-full"
+            src={article.data.image}
+            alt={article.data.imageAlt ?? ''}
+            widths={[640, 900, 1280]}
+            sizes="(max-width: 940px) calc(100vw - 40px), 900px"
+          />
+          {article.data.imageCaption && (
+            <figcaption class="mt-[0.55rem] text-center text-[1rem] leading-[1.35] italic">
+              {article.data.imageCaption}
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
+
+    <article
+      class={`${articleShellClassName} columns-1 gap-0 border-t border-rule py-[clamp(80px,12vw,160px)] text-[22px] leading-[1.36] max-[679px]:text-[1.15rem] max-[679px]:leading-[1.5] [&>*]:mx-auto [&>*]:max-w-[680px] [&>p:first-child::first-letter]:float-left [&>p:first-child::first-letter]:mt-[0.035em] [&>p:first-child::first-letter]:mr-[0.08em] [&>p:first-child::first-letter]:text-[4em] [&>p:first-child::first-letter]:leading-[0.6] [&_p]:mb-[1.15em] [&_p]:[break-inside:avoid] [&_p]:text-justify [&_p]:[text-align-last:auto] [&_p]:[text-justify:inter-word] [&_p:last-child]:mb-0 [&_h2]:mt-[1.8em] [&_h2]:mb-[0.55em] [&_h2]:text-[clamp(2.5rem,4vw,3.75rem)] [&_h2]:leading-[0.95] [&_h2]:font-light [&_h2]:tracking-[-0.025em] [&_h2]:[break-after:avoid] max-[679px]:[&_h2]:font-normal [&_blockquote]:!my-[3em] [&_blockquote]:!max-w-[820px] [&_blockquote]:border-l [&_blockquote]:border-rule [&_blockquote]:py-[0.35em] [&_blockquote]:pr-0 [&_blockquote]:pl-[1em] [&_blockquote]:text-[1.5em] [&_blockquote]:leading-[1.18] [&_code]:font-mono [&_code]:text-[0.82em] [&_img]:my-[1.25em] [&_img]:block [&_img]:h-auto [&_img]:max-w-full`}
+    >
+      <Content />
+    </article>
+  </main>
+</SiteLayout>

@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+**/node_modules/
 /.pnpm-store/
 /.pnp
 .pnp.*
@@ -12,13 +12,12 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/.vinext/
-/out/
-
-# astro
-/.astro/
+# builds and task caches
+**/.astro/
+**/dist/
+**/.vercel/
+**/.wrangler/
+**/.turbo/
 
 # misc
 .DS_Store
@@ -31,13 +30,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local environment
-.env*
+**/.env*
+!**/.env.example
 
 # deployment and generated files
-.vercel
-next-env.d.ts
 tsconfig.tsbuildinfo
-/dist/
-/.wrangler/
 /outputs/
 /work/

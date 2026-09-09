@@ -1,0 +1,62 @@
+---
+import '@/styles.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title = 'Dylan Mou Ang — Software Engineer',
+  description =
+    'Dylan Mou Ang is a software engineer working on infrastructure at Aina.',
+  noIndex = false,
+} = Astro.props;
+const currentYear = new Date().getFullYear();
+---
+
+<!doctype html>
+<html
+  lang="en"
+  class="min-h-full scroll-smooth bg-paper [color-scheme:only_light] motion-reduce:scroll-auto"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    <link
+      rel="preload"
+      href="/fonts/cormorant-garamond-roman.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/cormorant-garamond-italic.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body id="top" class="min-h-full bg-paper font-serif text-[20px] leading-[1.45] text-ink [text-rendering:optimizeLegibility] selection:bg-ink selection:text-paper">
+    <slot />
+    <footer class="mx-auto mt-[clamp(64px,9vw,110px)] w-[min(calc(100%_-_48px),1040px)] border-t border-rule pt-4 pb-[clamp(28px,5vw,48px)] text-[0.95rem] max-[760px]:w-[min(calc(100%_-_28px),100%)]">
+      <div class="flex items-baseline justify-between gap-6">
+        <p>© {currentYear} Dylan Mou Ang</p>
+        <a
+          class="italic underline-offset-[0.17em] focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-ink"
+          href="#top"
+        >
+          Back to top ↑
+        </a>
+      </div>
+    </footer>
+  </body>
+</html>
