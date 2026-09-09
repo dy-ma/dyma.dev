@@ -2,21 +2,21 @@ import tailwindcss from '@tailwindcss/postcss';
 import vinext from 'vinext';
 import { defineConfig } from 'vite';
 
-const LOCAL_DATABASE_ID = '00000000-0000-4000-8000-000000000000';
-
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
 
 const localBindingConfig = {
-  main: 'vinext/server/fetch-handler',
+  main: './server/visitor-counter-worker.ts',
   compatibility_flags: ['nodejs_compat'],
-  d1_databases: [
-    {
-      binding: 'DB',
-      database_name: 'portfolio-d1',
-      database_id: LOCAL_DATABASE_ID,
-    },
-  ],
+  durable_objects: {
+    bindings: [
+      {
+        name: 'VISITOR_COUNTER_DO',
+        class_name: 'VisitorCounterDurableObject',
+      },
+    ],
+  },
+  migrations: [{ tag: 'v1', new_classes: ['VisitorCounterDurableObject'] }],
   r2_buckets: [],
 };
 

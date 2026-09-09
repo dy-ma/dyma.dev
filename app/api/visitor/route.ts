@@ -7,6 +7,108 @@ import {
 } from '@/lib/visitor-cookie';
 
 const DAY = 1000 * 60 * 60 * 24;
+const VISITOR_DO_ID = 'global';
+
+const ACTIVE_VISITOR_PREFIX = 'active-visitor:';
+const ACTIVE_VISITOR_TTL_MS = 60_000;
+const TOTAL_VISITORS_KEY = 'total-visitors';
+
+type VisitRequest = {
+  visitorNumber?: number | null;
+};
+
+type VisitResponse = {
+  visitorNumber: number;
+  total: number;
+  currentVisitors: number;
+  returning: boolean;
+};
+
+function sanitizeVisitorNumber(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0)
+    return null;
+  return value;
+}
+
+export class VisitorCounterDurableObject {
+  private readonly state: DurableObjectState;
+
+  constructor(state: DurableObjectState) {
+    this.state = state;
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    if (new URL(request.url).pathname !== '/api/visitor') {
+      return new Response('Not Found', { status: 404 });
+    }
+    if (request.method !== 'POST') {
+      return new Response('Method Not Allowed', {
+        status: 405,
+        headers: { Allow: 'POST' },
+      });
+    }
+
+    const { visitorNumber: incomingVisitorNumber } = await request
+      .json()
+      .catch((): VisitRequest => ({}));
+    const existingVisitorNumber = sanitizeVisitorNumber(incomingVisitorNumber);
+
+    const previousTotal = (await this.state.storage.get<number>(TOTAL_VISITORS_KEY)) ?? 0;
+    const now = Date.now();
+    const threshold = now - ACTIVE_VISITOR_TTL_MS;
+
+    const activeVisitorEntries = await this.state.storage.list<{ lastSeen: number }>(
+      { prefix: ACTIVE_VISITOR_PREFIX },
+    );
+
+    const staleKeys: string[] = [];
+    let currentVisitors = 0;
+    for (const [key, value] of activeVisitorEntries) {
+      if (!value || typeof value.lastSeen !== 'number' || value.lastSeen < threshold) {
+        staleKeys.push(key);
+      } else {
+        currentVisitors += 1;
+      }
+    }
+
+    if (staleKeys.length > 0) {
+      await this.state.storage.delete(staleKeys);
+      currentVisitors -= staleKeys.length;
+    }
+
+    let visitorNumber: number;
+    let total = previousTotal;
+    let returning = false;
+
+    if (existingVisitorNumber === null) {
+      visitorNumber = previousTotal + 1;
+      total = visitorNumber;
+      returning = false;
+    } else {
+      visitorNumber = existingVisitorNumber;
+      returning = true;
+      if (existingVisitorNumber > total) {
+        total = existingVisitorNumber;
+      }
+    }
+
+    currentVisitors += 1;
+    await this.state.storage.put(ACTIVE_VISITOR_PREFIX + String(visitorNumber), {
+      lastSeen: now,
+    });
+    await this.state.storage.put(TOTAL_VISITORS_KEY, total);
+
+    const response: VisitResponse = {
+      visitorNumber,
+      total,
+      currentVisitors,
+      returning,
+    };
+    return Response.json(response, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+}
 
 function readCookie(request: Request) {
   const header = request.headers.get('cookie') ?? '';
@@ -19,46 +121,42 @@ function readCookie(request: Request) {
     : null;
 }
 
-async function ensureCounter() {
-  await env.DB.prepare(
-    'CREATE TABLE IF NOT EXISTS site_stats (key TEXT PRIMARY KEY NOT NULL, value INTEGER NOT NULL, updated_at INTEGER NOT NULL)',
-  ).run();
-}
-
 export async function GET(request: Request) {
-  await ensureCounter();
-
   const secret =
     env.VISITOR_COOKIE_SECRET || 'local-preview-secret-change-in-production';
   const now = Date.now();
   const existing = await readVisitorCookie(readCookie(request), secret);
-  let visitorNumber: number;
-  let total: number;
-
-  if (existing) {
-    visitorNumber = existing.visitorNumber;
-    const current = await env.DB.prepare(
-      "SELECT value FROM site_stats WHERE key = 'visitors'",
-    ).first<{
-      value: number;
-    }>();
-    total = Math.max(current?.value ?? visitorNumber, visitorNumber);
-  } else {
-    const next = await env.DB.prepare(
-      "INSERT INTO site_stats (key, value, updated_at) VALUES ('visitors', 1, ?) ON CONFLICT(key) DO UPDATE SET value = value + 1, updated_at = excluded.updated_at RETURNING value",
-    )
-      .bind(now)
-      .first<{ value: number }>();
-    visitorNumber = next?.value ?? 1;
-    total = visitorNumber;
+  const visitorResponse = await env.VISITOR_COUNTER_DO.get(
+    env.VISITOR_COUNTER_DO.idFromName(VISITOR_DO_ID),
+  ).fetch(
+    new Request('http://local.visitor-counter-do/api/visitor', {
+      method: 'POST',
+      body: JSON.stringify({ visitorNumber: existing?.visitorNumber ?? null }),
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  );
+  if (!visitorResponse.ok) {
+    return new Response('Visitor counter unavailable', { status: 502 });
   }
+  const {
+    visitorNumber,
+    total,
+    currentVisitors,
+    returning: doReturning,
+  } = (await visitorResponse.json()) as {
+    visitorNumber: number;
+    total: number;
+    currentVisitors: number;
+    returning: boolean;
+  };
 
   const token = await createVisitorCookie(visitorNumber, now, secret);
   const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
   const response = Response.json({
     visitorNumber,
     total,
-    returning: Boolean(existing),
+    currentVisitors,
+    returning: doReturning,
     lastVisitDays: existing
       ? Math.max(0, Math.floor((now - existing.lastVisitAt) / DAY))
       : null,

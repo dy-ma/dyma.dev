@@ -8,6 +8,7 @@ import {
   type PreparedTextWithSegments,
 } from '@chenglou/pretext';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 type PositionedLine = {
   isLast?: boolean;
@@ -133,7 +134,15 @@ function projectSpread(
   };
 }
 
-export function PretextSpread({ lead, text }: { lead: string; text: string }) {
+export function PretextSpread({
+  lead,
+  text,
+  columns = 2,
+}: {
+  lead: string;
+  text: string;
+  columns?: 1 | 2;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState<SpreadLayout | null>(null);
 
@@ -147,7 +156,11 @@ export function PretextSpread({ lead, text }: { lead: string; text: string }) {
         document.fonts.load(`400 ${BODY_FONT_SIZE}px "Cormorant Garamond"`),
         document.fonts.load(`400 ${LEDE_FONT_SIZE}px "Cormorant Garamond"`),
       ]);
-      if (!cancelled && host.clientWidth >= COLUMN_BREAKPOINT) {
+      if (
+        !cancelled &&
+        columns === 2 &&
+        host.clientWidth >= COLUMN_BREAKPOINT
+      ) {
         setLayout(projectSpread(lead, text, host.clientWidth));
       } else if (!cancelled) {
         setLayout(null);
@@ -162,27 +175,39 @@ export function PretextSpread({ lead, text }: { lead: string; text: string }) {
       cancelled = true;
       observer.disconnect();
     };
-  }, [lead, text]);
+  }, [lead, text, columns]);
 
   return (
-    <div className="pretext-spread" ref={hostRef}>
+    <div
+      className="mx-auto mt-[clamp(54px,8vw,92px)] w-[min(100%,860px)]"
+      ref={hostRef}
+    >
       <p
-        className={`pretext-mobile${layout ? '' : ' pretext-mobile--visible'}`}
+        className={cn(
+          'm-0 hidden text-justify text-[1.1rem] leading-[1.4] [text-align-last:auto] [text-justify:inter-word] max-[467px]:mt-8 max-[467px]:block',
+          !layout && 'block',
+        )}
       >
-        <span>{lead}</span>
+        <span className="float-left mt-[0.06em] mr-[0.08em] text-[3.6rem] leading-[0.78]">
+          {lead}
+        </span>
         {text}
       </p>
 
       {layout ? (
-        <div className="pretext-stage" style={{ height: layout.height }}>
-          <div className="pretext-lines" aria-hidden="true">
+        <div className="relative w-full" style={{ height: layout.height }}>
+          <div aria-hidden="true">
             {layout.lines.map((line) => (
               <span
-                className={
+                className={cn(
+                  'absolute block overflow-hidden whitespace-nowrap font-normal',
                   line.kind === 'lede'
-                    ? 'pretext-lede-line'
-                    : `pretext-body-line${line.isLast ? ' pretext-body-line--last' : ''}`
-                }
+                    ? 'h-[54px] text-[68px] leading-[54px] tracking-[-0.025em]'
+                    : 'h-[27px] text-justify text-[21px] leading-[27px] [text-align-last:justify]',
+                  line.kind === 'body' &&
+                    line.isLast &&
+                    '[text-align-last:left]',
+                )}
                 key={line.key}
                 style={{ left: line.x, top: line.y, width: line.width }}
               >
