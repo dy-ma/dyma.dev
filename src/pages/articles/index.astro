@@ -1,0 +1,47 @@
+---
+import NewspaperStory from '@/components/NewspaperStory.astro';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { getPublishedArticles } from '@/lib/articles';
+
+export const prerender = true;
+
+const publishedArticles = await getPublishedArticles();
+---
+
+<SiteLayout
+  title="All articles — Dylan Mou Ang"
+  description="Notes from Dylan Mou Ang’s recent work."
+>
+  <main class="mx-auto w-[min(calc(100%_-_48px),1040px)] pt-6 pb-14 max-[760px]:w-[min(calc(100%_-_28px),100%)]">
+    <nav class="text-[0.95rem]" aria-label="Article navigation">
+      <a
+        class="underline-offset-[0.17em] focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-ink"
+        href="/#work"
+      >
+        ← Front page
+      </a>
+    </nav>
+
+    <header class="mt-[clamp(42px,7vw,82px)] border-y-4 border-double border-ink py-[clamp(20px,3vw,34px)] text-center">
+      <p class="my-[0.55rem] text-[0.9rem] italic">The complete index</p>
+      <h1 class="text-[clamp(4.2rem,10vw,8.6rem)] leading-[0.82] font-light tracking-[-0.055em] max-[760px]:font-normal">
+        All articles
+      </h1>
+    </header>
+
+    <div class="grid grid-cols-12 border-b-4 border-double border-ink max-[540px]:block">
+      {
+        publishedArticles.map((article, index) => (
+          <NewspaperStory
+            article={article}
+            context="archive"
+            index={index}
+            total={publishedArticles.length}
+            returnTo="/articles"
+            returnLabel="← Back"
+          />
+        ))
+      }
+    </div>
+  </main>
+</SiteLayout>

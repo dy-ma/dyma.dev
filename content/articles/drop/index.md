@@ -10,8 +10,6 @@ homeTreatment: full
 image: ./hero.png
 imageAlt: A pig standing on its hind legs while unplugging a cable from a server rack.
 imageCaption: Transfer supervision in progress.
-imageWidth: 900
-imageHeight: 600
 ---
 
 The familiar browser download has a simple shape: one response becomes one file. That shape works until the thing being downloaded is not really a file at all. At Aina, a dataset can be a directory tree containing terabytes of footage. Asking the browser to download it exposes a mismatch between the interface and the thing a person actually wants.

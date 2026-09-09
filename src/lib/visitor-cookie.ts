@@ -51,8 +51,9 @@ export async function readVisitorCookie(
   if (
     !Number.isSafeInteger(visitorNumber) ||
     !Number.isSafeInteger(lastVisitAt)
-  )
+  ) {
     return null;
+  }
   return { visitorNumber, lastVisitAt };
 }
 

@@ -13,8 +13,8 @@ content/articles/
     another-image.png
 ```
 
-The directory name becomes the URL slug. Frontmatter is intentionally flat:
-strings, numbers, and booleans are supported. Invalid records fail the build.
+The directory name becomes the URL slug. Astro validates the frontmatter as a
+typed content collection, and invalid records fail the build.
 
 Required frontmatter:
 
@@ -33,16 +33,14 @@ One published home-page article must be marked `home: lead`. The other selected
 home-page articles use `home: secondary`. Articles marked `home: none` still
 appear in `/articles` when published.
 
-An optional hero image uses `image`, `imageAlt`, `imageWidth`, and
-`imageHeight`; `imageCaption` is optional. Put the image beside `index.md` and
-reference it relatively:
+An optional hero image uses `image` and `imageAlt`; `imageCaption` is optional.
+Astro reads the dimensions from the source file and generates responsive image
+variants. Put the image beside `index.md` and reference it relatively:
 
 ```yaml
 image: ./hero.png
 imageAlt: A pig monitoring a server rack
 imageCaption: Transfer supervision in progress.
-imageWidth: 900
-imageHeight: 600
 ```
 
 Ordinary Markdown images in the article body can also use local paths such as

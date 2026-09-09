@@ -1,0 +1,13 @@
+---
+import { getArticles } from '@/lib/articles';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return (await getArticles()).map((article) => ({
+    params: { slug: article.id },
+  }));
+}
+
+return Astro.redirect(`/articles/${Astro.params.slug}`, 301);
+---

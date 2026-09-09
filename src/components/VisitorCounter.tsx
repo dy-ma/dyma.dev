@@ -1,5 +1,3 @@
-'use client';
-
 import NumberFlow, { continuous } from '@number-flow/react';
 import { useEffect, useState } from 'react';
 
@@ -63,17 +61,9 @@ function AnimatedVisitorNumber({ value }: { value: number }) {
   );
 }
 
-export function VisitorCounter({
-  initialReturning,
-  initialVisitorNumber,
-}: {
-  initialReturning: boolean;
-  initialVisitorNumber: number | null;
-}) {
+export function VisitorCounter() {
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const [unavailable, setUnavailable] = useState(false);
-  const targetNumber = visitor?.visitorNumber ?? initialVisitorNumber;
-  const returning = visitor?.returning ?? initialReturning;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,38 +82,34 @@ export function VisitorCounter({
     return () => controller.abort();
   }, []);
 
-  const finalNumber = targetNumber?.toLocaleString('en-US') ?? '';
+  const finalNumber = visitor?.visitorNumber.toLocaleString('en-US') ?? '';
   const currentVisitors = Math.max(1, visitor?.currentVisitors ?? 1);
 
   return (
     <header className="text-center" aria-live="polite" aria-atomic="true">
-      <h1 className="mx-auto max-w-[13ch] text-[clamp(4.5rem,10.5vw,9.5rem)] leading-[0.83] font-light tracking-[-0.052em] max-[760px]:max-w-[9ch] max-[760px]:text-[clamp(4rem,20vw,6rem)] max-[760px]:font-normal">
-        Welcome{returning ? ' back' : ''},{' '}
+      <h1 className="mx-auto max-w-[13ch] text-[clamp(4.5rem,10.5vw,9.5rem)] leading-[0.83] font-light tracking-[-0.052em] max-[760px]:max-w-[9ch] max-[760px]:text-[clamp(3.5rem,15.5vw,4.75rem)] max-[760px]:font-normal">
+        Welcome{visitor?.returning ? ' back' : ''},{' '}
         <span className="whitespace-nowrap">
           visitor{' '}
           <span
-            className="inline-block text-center align-baseline leading-[0.9] [font-feature-settings:'lnum'_1,'tnum'_1] [font-variant-numeric:lining-nums_tabular-nums]"
+            className="inline-block min-w-[0.7em] text-center align-baseline leading-[0.9] [font-feature-settings:'lnum'_1,'tnum'_1] [font-variant-numeric:lining-nums_tabular-nums]"
             aria-label={
-              targetNumber === null
-                ? unavailable
-                  ? 'unavailable'
-                  : 'loading'
-                : finalNumber
+              visitor ? finalNumber : unavailable ? 'unavailable' : 'loading'
             }
           >
-            {targetNumber === null ? (
-              <span aria-hidden="true">{unavailable ? '—' : '0'}</span>
-            ) : returning ? (
-              <span className="inline-block align-baseline leading-[0.9] [--number-flow-mask-height:0.2em] [--number-flow-mask-width:0.12em]">
-                {finalNumber}
-              </span>
+            {visitor ? (
+              visitor.returning ? (
+                finalNumber
+              ) : (
+                <AnimatedVisitorNumber value={visitor.visitorNumber} />
+              )
             ) : (
-              <AnimatedVisitorNumber value={targetNumber} />
+              <span aria-hidden="true">{unavailable ? '—' : '·'}</span>
             )}
           </span>
         </span>
       </h1>
-      <p className="mt-[1.3rem] min-h-[1.45em] text-base text-faded max-[760px]:text-[0.9rem]">
+      <p className="mx-auto mt-[1.3rem] min-h-[1.45em] max-w-[42ch] text-base text-faded max-[760px]:max-w-[34ch] max-[760px]:text-[0.9rem]">
         {visitor
           ? `There are ${visitor.total.toLocaleString('en-US')} of us so far, and ${currentVisitors.toLocaleString(
               'en-US',
