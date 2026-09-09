@@ -5,7 +5,9 @@ import {
   getPreviewParagraphs,
   type Article,
 } from '@/lib/articles';
-import { cn } from '@/lib/utils';
+
+type ClassName = string | false | null | undefined;
+const classNames = (...values: ClassName[]) => values.filter(Boolean).join(' ');
 
 interface Props {
   article: Article;
@@ -39,7 +41,7 @@ const hasArchiveLeftBorder =
   archiveShape === 'narrow' ||
   (archiveShape === 'half' && previousArchiveShape === 'half') ||
   (archiveShape === 'wide' && previousArchiveShape === 'narrow');
-const className = cn(
+const className = classNames(
   'group flex min-w-0 flex-col text-ink no-underline focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-ink',
   isArchive
     ? 'p-[clamp(22px,3vw,34px)] max-[540px]:block max-[540px]:border-l-0 max-[540px]:px-0 max-[540px]:py-6'
@@ -84,7 +86,7 @@ const previewParagraphs = getPreviewParagraphs(article, 2);
       {date && <span>{date}</span>}
     </p>
     <Headline
-      class={cn(
+      class={classNames(
         'leading-[0.9] font-normal tracking-[-0.04em] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[0.08em] group-focus-visible:underline group-focus-visible:decoration-1 group-focus-visible:underline-offset-[0.08em]',
         isArchive
           ? archiveShape === 'narrow'
@@ -123,7 +125,7 @@ const previewParagraphs = getPreviewParagraphs(article, 2);
   }
 
   <div
-    class={cn(
+    class={classNames(
       'mt-4 text-justify text-base leading-[1.25] [text-justify:inter-word] [&>:first-child]:mt-0 [&>:last-child]:mb-0 [&_p]:mb-[0.85em] [&_p]:[break-inside:avoid] [&_p:first-child::first-letter]:float-left [&_p:first-child::first-letter]:mt-[0.045em] [&_p:first-child::first-letter]:mr-[0.08em] [&_p:first-child::first-letter]:text-[3.35em] [&_p:first-child::first-letter]:leading-[0.72]',
       isArchive &&
         "relative max-h-52 overflow-hidden after:absolute after:right-0 after:bottom-0 after:h-[2.8rem] after:w-full after:bg-[linear-gradient(to_bottom,transparent,#fff_82%)] after:content-['']",
@@ -142,7 +144,10 @@ const previewParagraphs = getPreviewParagraphs(article, 2);
   </div>
 
   <span
-    class={cn('self-end pt-4 text-[0.86rem] italic', isArchive && 'mt-auto')}
+    class={classNames(
+      'self-end pt-4 text-[0.86rem] italic',
+      isArchive && 'mt-auto',
+    )}
     aria-hidden="true"
   >
     {
