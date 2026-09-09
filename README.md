@@ -64,7 +64,7 @@ Deploy it with:
 pnpm deploy:presence
 ```
 
-For Workers Builds, set **Root directory** to `apps/presence` and use
+For Workers Builds, set **Root directory** to `/apps/presence` and use
 `pnpm deploy` as the production deploy command. Leave the non-production deploy
 command as `pnpm exec wrangler versions upload`; it uploads a testable Worker
 version without moving production traffic. Configure these repository-relative
