@@ -1,0 +1,18 @@
+packages:
+  - apps/*
+
+allowBuilds:
+  'esbuild@0.28.1 || 0.28.2': true
+  'workerd@1.20260907.1 || 1.20260908.1': true
+
+minimumReleaseAgeExclude:
+  - '@astrojs/vercel@11.0.10'
+  - '@astrojs/markdown-satteri@0.4.1'
+  - astro@7.3.2
+  - miniflare@5.20260908.0-alpha
+  - turbo@2.10.12
+  - wrangler@4.130.0
+
+overrides:
+  path-to-regexp: 6.3.0
+  sharp: 0.35.4

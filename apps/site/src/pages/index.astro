@@ -1,0 +1,134 @@
+---
+import ArticleGroup from '@/components/ArticleGroup.astro';
+import { VisitorCounter } from '@/components/VisitorCounter';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { getPublishedArticles, type Article } from '@/lib/articles';
+
+export const prerender = true;
+
+const publishedArticles = await getPublishedArticles();
+const articleGroups: { articles: Article[]; reversed: boolean }[] = [];
+const incompleteGroupSize = publishedArticles.length % 3;
+let articleIndex = 0;
+
+if (incompleteGroupSize > 0) {
+  articleGroups.push({
+    articles: publishedArticles.slice(0, incompleteGroupSize),
+    reversed: false,
+  });
+  articleIndex = incompleteGroupSize;
+}
+
+const completedGroupCount = Math.floor(publishedArticles.length / 3);
+let completedGroupIndex = completedGroupCount - 1;
+while (articleIndex < publishedArticles.length) {
+  articleGroups.push({
+    articles: publishedArticles.slice(articleIndex, articleIndex + 3),
+    reversed: completedGroupIndex % 2 === 1,
+  });
+  articleIndex += 3;
+  completedGroupIndex -= 1;
+}
+const contactLinks = [
+  { href: 'mailto:dylanmouang@gmail.com', label: 'Email' },
+  { href: 'https://www.linkedin.com/in/dylan-mou-ang', label: 'LinkedIn' },
+  { href: 'https://github.com/dy-ma', label: 'GitHub' },
+  { href: 'https://x.com/dymaonx', label: 'Twitter' },
+] as const;
+---
+
+<SiteLayout>
+  <main>
+    <article class="relative mx-auto min-h-svh w-[min(calc(100%_-_48px),1040px)] pt-[clamp(44px,7vw,88px)] pb-[clamp(46px,6vw,78px)] max-[760px]:w-[min(calc(100%_-_28px),100%)] max-[760px]:pt-10">
+      <VisitorCounter client:load />
+
+      <figure class="mx-auto mt-[clamp(48px,7vw,78px)] w-[min(92%,820px)] max-[760px]:w-full">
+        <img
+          class="block h-auto w-full"
+          src="/images/pig-field.png"
+          width="900"
+          height="600"
+          alt="A pig sitting in an open field, facing away toward the horizon."
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption class="mt-2 text-center text-[1rem] leading-[1.3] italic">Fig. 1</figcaption>
+      </figure>
+
+      <div id="about">
+        <div class="mt-[clamp(42px,5.5vw,64px)] columns-2 gap-[clamp(24px,4vw,48px)] text-justify text-[22px] leading-[1.34] [column-fill:balance] [text-justify:inter-word] [&_p+p]:mt-[0.9em] max-[620px]:columns-1 max-[620px]:text-left max-[620px]:text-[1.16rem] max-[620px]:leading-[1.48]">
+          <p>
+            <span class="float-left mt-[0.035em] mr-[0.08em] text-[4.45em] leading-[0.52]">H</span>ey,
+            I’m Dylan. I’m a software engineer at{' '}
+            <a
+              class="underline decoration-[0.045em] underline-offset-[0.12em] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-ink"
+              href="https://ainatech.ai"
+              target="_blank"
+              rel="noreferrer"
+            >Aina</a>, where I work on infrastructure for large media and compute workloads. My work
+            touches deployment, storage, databases, observability, and distributed systems.
+          </p>
+          <p>
+            Outside of work, I volunteer at the Morgan Hill Buddhist Community Center. At home, I
+            have a homelab that is mostly a very expensive way to avoid paying for Netflix,
+            especially once you count the hours. I also build practical effects and interactive
+            Halloween props. This involves hobby electronics, PCB design, and regularly discovering
+            that I am not very good at any of it. I keep doing it anyway.
+          </p>
+          <p>This is where I write down some of what I learn.</p>
+        </div>
+        <nav
+          class="mt-[clamp(18px,2.4vw,26px)] flex flex-wrap justify-center gap-3"
+          aria-label="Contact links"
+        >
+          {
+            contactLinks.map((link) => {
+              const isEmail = link.href.startsWith('mailto:');
+              return (
+                <a
+                  class="rounded-full border border-rule px-4 py-[0.38rem] text-[1rem] leading-none italic no-underline transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper focus-visible:outline-2 focus-visible:outline-offset-[4px] focus-visible:outline-ink"
+                  href={link.href}
+                  target={isEmail ? undefined : '_blank'}
+                  rel={isEmail ? undefined : 'noreferrer'}
+                >
+                  {link.label}
+                </a>
+              );
+            })
+          }
+        </nav>
+      </div>
+    </article>
+
+    <div
+      class="mx-auto mt-[clamp(0.9rem,2vw,1.8rem)] mb-[clamp(1rem,2.2vw,2rem)] w-[min(calc(100%_-_48px),1040px)] border-t border-rule max-[760px]:w-[min(calc(100%_-_28px),100%)]"
+      aria-hidden="true"
+    ></div>
+
+    <section
+      id="work"
+      class="relative mx-auto w-[min(calc(100%_-_48px),1040px)] pt-[clamp(16px,2.9vw,30px)] max-[760px]:w-[min(calc(100%_-_28px),100%)]"
+      aria-labelledby="work-title"
+    >
+      <header class="py-[clamp(12px,1.8vw,20px)] pb-[clamp(20px,2vw,26px)] text-center max-[540px]:pt-4 max-[540px]:pb-5">
+        <h2
+          id="work-title"
+          class="mx-auto whitespace-nowrap text-[clamp(3.2rem,7vw,6.4rem)] leading-[0.82] font-light tracking-[-0.055em] max-[760px]:max-w-[14ch] max-[760px]:whitespace-normal max-[540px]:text-[clamp(2.85rem,15vw,4.25rem)] max-[540px]:font-normal"
+        >
+          What I’ve been up to
+        </h2>
+      </header>
+      <div class="border-y-4 border-double border-ink">
+        {
+          articleGroups.map((group, index) => (
+            <ArticleGroup
+              articles={group.articles}
+              reversed={group.reversed}
+              last={index === articleGroups.length - 1}
+            />
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</SiteLayout>

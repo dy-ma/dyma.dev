@@ -1,0 +1,23 @@
+{
+  "name": "@dyma/presence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry wrangler dev --port 8787 --var VISITOR_API_SECRET:local-development-secret",
+    "build": "WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy --dry-run --outdir dist",
+    "check": "tsc --noEmit",
+    "lint": "oxlint src",
+    "format": "oxfmt",
+    "deploy": "WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy",
+    "cf-typegen": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "oxfmt": "0.61.0",
+    "oxlint": "1.76.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "5.9.3",
+    "wrangler": "4.130.0"
+  }
+}

@@ -1,0 +1,80 @@
+---
+import NewspaperStory from '@/components/NewspaperStory.astro';
+import type { Article } from '@/lib/articles';
+
+type ClassName = string | false | null | undefined;
+type StoryVariant = 'lead' | 'secondary' | 'half' | 'full';
+const classNames = (...values: ClassName[]) => values.filter(Boolean).join(' ');
+
+interface Props {
+  articles: Article[];
+  reversed?: boolean;
+  last?: boolean;
+}
+
+const { articles, reversed = false, last = false } = Astro.props;
+const count = articles.length;
+const groupClassName = classNames(
+  'grid items-stretch max-[760px]:block max-[760px]:h-auto',
+  count === 3 &&
+    (reversed
+      ? 'h-[clamp(980px,96vw,1040px)] grid-cols-[minmax(210px,1fr)_minmax(0,2fr)] grid-rows-2'
+      : 'h-[clamp(980px,96vw,1040px)] grid-cols-[minmax(0,2fr)_minmax(210px,1fr)] grid-rows-2'),
+  count === 2 && 'h-[clamp(680px,70vw,780px)] grid-cols-2',
+  count === 1 && 'h-[clamp(720px,78vw,860px)] grid-cols-1',
+  !last && 'border-b border-ink',
+);
+
+function storyPresentation(index: number): {
+  variant: StoryVariant;
+  className: string;
+} {
+  if (count === 1) {
+    return { variant: 'full', className: 'px-0' };
+  }
+
+  if (count === 2) {
+    return index === 0
+      ? { variant: 'half', className: 'border-r border-ink pl-0' }
+      : { variant: 'half', className: 'pr-0' };
+  }
+
+  if (index === 0) {
+    return reversed
+      ? {
+          variant: 'lead',
+          className:
+            'col-start-2 row-span-2 row-start-1 border-l border-ink pr-0',
+        }
+      : {
+          variant: 'lead',
+          className:
+            'col-start-1 row-span-2 row-start-1 border-r border-ink pl-0',
+        };
+  }
+
+  return {
+    variant: 'secondary',
+    className: classNames(
+      reversed ? 'col-start-1 pl-0' : 'col-start-2 pr-0',
+      index === 2 && 'border-t border-ink',
+    ),
+  };
+}
+---
+
+<div class={groupClassName}>
+  {
+    articles.map((article, index) => {
+      const presentation = storyPresentation(index);
+      return (
+        <NewspaperStory
+          article={article}
+          variant={presentation.variant}
+          className={presentation.className}
+          mobileSeparated={index > 0}
+        />
+      );
+    })
+  }
+</div>

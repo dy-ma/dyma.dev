@@ -1,0 +1,122 @@
+---
+import { Image } from 'astro:assets';
+import {
+  formatArticleDate,
+  getPreviewParagraphs,
+  type Article,
+} from '@/lib/articles';
+
+type ClassName = string | false | null | undefined;
+const classNames = (...values: ClassName[]) => values.filter(Boolean).join(' ');
+
+type StoryVariant = 'lead' | 'secondary' | 'half' | 'full';
+
+interface Props {
+  article: Article;
+  variant: StoryVariant;
+  className?: string;
+  mobileSeparated?: boolean;
+}
+
+const {
+  article,
+  variant,
+  className,
+  mobileSeparated = false,
+} = Astro.props;
+const href = `/articles/${article.id}`;
+const date = formatArticleDate(article.data.date);
+const isLarge = variant === 'lead' || variant === 'full';
+const previewLimit = isLarge ? 1800 : variant === 'half' ? 1100 : 700;
+const previewParagraphs = getPreviewParagraphs(article, previewLimit);
+const [firstParagraph = '', ...remainingParagraphs] = previewParagraphs;
+const dropCap = firstParagraph.charAt(0);
+const firstParagraphRemainder = firstParagraph.slice(1);
+const storyClassName = classNames(
+  'group flex min-h-0 min-w-0 flex-col overflow-hidden p-[clamp(20px,2.5vw,30px)] text-ink no-underline focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-ink max-[760px]:overflow-visible max-[760px]:border-r-0 max-[760px]:border-l-0 max-[760px]:px-0 max-[760px]:py-[22px]',
+  mobileSeparated && 'max-[760px]:border-t max-[760px]:border-ink',
+  className,
+);
+---
+
+<a href={href} class={storyClassName} aria-label={`Read ${article.data.headline}`}>
+  <header class="contents">
+    <p class="mb-[0.65rem] flex shrink-0 justify-between gap-4 text-[0.9rem] leading-none tracking-[0.08em] [font-variant:small-caps]">
+      <span>{article.data.project}</span>
+      {date && <span>{date}</span>}
+    </p>
+    <h3
+      class={classNames(
+        'shrink-0 leading-[0.9] font-normal tracking-[-0.04em] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[0.08em] group-focus-visible:underline group-focus-visible:decoration-1 group-focus-visible:underline-offset-[0.08em]',
+        variant === 'lead' &&
+          'text-[clamp(3rem,6vw,5.6rem)] max-[760px]:text-[clamp(2.55rem,13vw,3.8rem)]',
+        variant === 'secondary' &&
+          'text-[clamp(2rem,3.8vw,3.35rem)] max-[760px]:text-[clamp(2.55rem,13vw,3.8rem)]',
+        variant === 'half' &&
+          'text-[clamp(2.65rem,4.8vw,4.5rem)] max-[760px]:text-[clamp(2.55rem,13vw,3.8rem)]',
+        variant === 'full' &&
+          'text-[clamp(3.3rem,7vw,6.5rem)] max-[760px]:text-[clamp(2.55rem,13vw,3.8rem)]',
+      )}
+    >
+      {article.data.headline}
+    </h3>
+  </header>
+
+  {
+    article.data.image && (
+      <figure
+        class={classNames(
+          'shrink-0',
+          variant === 'secondary'
+            ? 'mt-[0.85rem]'
+            : 'mt-[1.15rem]',
+        )}
+      >
+        <Image
+          class={classNames(
+            'block w-full contrast-[1.08]',
+            variant === 'lead' && 'h-auto',
+            (variant === 'secondary' || variant === 'half') &&
+              'aspect-[16/9] object-cover',
+            variant === 'full' && 'aspect-[2.4/1] object-cover',
+          )}
+          src={article.data.image}
+          alt={article.data.imageAlt ?? ''}
+          widths={[480, 680, 900]}
+          sizes="(max-width: 760px) calc(100vw - 28px), (max-width: 1100px) 62vw, 680px"
+        />
+        {article.data.imageCaption && (
+          <figcaption class="mt-[0.45rem] text-center text-[1rem] leading-[1.3] italic">
+            {article.data.imageCaption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+
+  <div
+    class={classNames(
+      'mt-4 text-justify text-base leading-[1.25] [text-justify:inter-word] [&>:first-child]:mt-0 [&>:last-child]:mb-0 [&_p]:mb-[0.85em]',
+      isLarge &&
+        "relative min-h-0 flex-1 columns-2 gap-[clamp(20px,3vw,34px)] overflow-hidden [column-fill:auto] [column-rule:none] after:absolute after:right-0 after:bottom-0 after:h-[1.8rem] after:w-full after:bg-[linear-gradient(to_bottom,transparent,#fff_88%)] after:content-[''] max-[760px]:max-h-[13.5rem] max-[760px]:flex-none max-[760px]:columns-1",
+      !isLarge &&
+        "relative min-h-0 flex-1 overflow-hidden after:absolute after:right-0 after:bottom-0 after:h-[1.15rem] after:w-full after:bg-[linear-gradient(to_bottom,transparent,#fff_90%)] after:content-[''] max-[760px]:max-h-48 max-[760px]:flex-none",
+    )}
+  >
+    {
+      firstParagraph && (
+        <p>
+          <span class="float-left mt-[0.04em] mr-[0.08em] text-[3.2em] leading-[0.7]">
+            {dropCap}
+          </span>
+          {firstParagraphRemainder}
+        </p>
+      )
+    }
+    {remainingParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <span class="mt-auto shrink-0 self-end pt-4 text-[0.95rem] italic" aria-hidden="true">
+    Read article →
+  </span>
+</a>
