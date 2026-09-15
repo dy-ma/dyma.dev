@@ -28,3 +28,30 @@ html,
 body {
   font-synthesis: none;
 }
+
+.article-body a {
+  font-weight: 500;
+  text-decoration-thickness: 0.055em;
+  text-underline-offset: 0.14em;
+}
+
+.article-body a[target='_blank']::after {
+  display: inline-block;
+  margin-left: 0.14em;
+  font-size: 0.7em;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: 0.3em;
+  content: '↗';
+}
+
+.article-body a:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  text-decoration: none;
+}
+
+.article-body a:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
+}
