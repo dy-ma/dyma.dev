@@ -1,0 +1,43 @@
+---
+import type { Article } from '@/lib/articles';
+
+type ArticleLink = NonNullable<Article['data']['links']>[number];
+
+interface Props {
+  links: ArticleLink[];
+}
+
+const { links } = Astro.props;
+---
+
+<nav class="flex flex-wrap gap-2" aria-label="Project links">
+  {
+    links.map((link) => (
+      <a
+        class="group inline-flex items-center gap-2 rounded-full border border-ink bg-paper px-4 py-[0.48rem] text-[1.02rem] leading-none font-medium no-underline shadow-[2px_2px_0_var(--color-ink)] transition-[transform,box-shadow,background-color,color] hover:-translate-y-px hover:bg-ink hover:text-paper hover:shadow-none focus-visible:-translate-y-px focus-visible:bg-ink focus-visible:text-paper focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-[4px] focus-visible:outline-ink"
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {link.icon === 'github' && (
+          <svg class="size-[0.95em]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .7a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.5 5.7 18.5 6 18.5 6c.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3c0 .4.2.7.8.6A12 12 0 0 0 12 .7Z" />
+          </svg>
+        )}
+        {link.icon === 'x' && (
+          <svg class="size-[0.86em]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.9 2h3.7l-8.1 9.2L24 22h-7.4l-5.8-7.6L4.2 22H.5l8.6-9.8L0 2h7.6l5.2 6.9L18.9 2Zm-1.3 18.1h2L6.5 3.8H4.4l13.2 16.3Z" />
+          </svg>
+        )}
+        {link.icon === 'website' && (
+          <svg class="size-[0.95em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21c-2.3-2.5-3.5-5.5-3.5-9S9.7 5.5 12 3Z" />
+          </svg>
+        )}
+        <span>{link.label}</span>
+        <span class="inline-block text-[0.78em] transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]" aria-hidden="true">↗</span>
+      </a>
+    ))
+  }
+</nav>

@@ -40,6 +40,20 @@ Ordinary Markdown images in the article body can also use local paths such as
 `![A transfer diagram](./diagram.png)`. Local image references are resolved at
 build time and emitted as static assets.
 
+Optional project links appear as prominent actions beneath the article title.
+Each link needs a `label` and absolute `href`; `icon` can be `github`, `x`, or
+`website`. Up to four links can be added:
+
+```yaml
+links:
+  - label: View the source
+    href: https://github.com/example/project
+    icon: github
+```
+
+External links in article Markdown open in a new tab and receive an external-link
+indicator automatically.
+
 `published: false` is an unlisted preview, not an access-control mechanism.
 Anyone with its direct URL can read it. Unlisted article pages emit `noindex`
 metadata.

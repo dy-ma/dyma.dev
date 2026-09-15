@@ -7,6 +7,13 @@ published: true
 image: ./hero.png
 imageAlt: A pig drawing a system diagram on a large whiteboard.
 imageCaption: Office hours are now in session.
+links:
+  - label: Watch the demo
+    href: https://x.com/dymadome/status/2099635848572797346?s=20
+    icon: x
+  - label: View the source
+    href: https://github.com/dy-ma/sketchpad-live
+    icon: github
 ---
 
 I made Sketchpad Live because conversation starts to feel cramped as soon as an idea becomes spatial. Describing which box connects to which other box is work a shared canvas should do for us. I wanted to see whether a voice agent could feel less like a chat window and more like a teacher standing at the board.

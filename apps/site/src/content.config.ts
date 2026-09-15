@@ -18,6 +18,16 @@ const articles = defineCollection({
       image: image().optional(),
       imageAlt: z.string().optional(),
       imageCaption: z.string().optional(),
+      links: z
+        .array(
+          z.object({
+            label: z.string().min(1),
+            href: z.url(),
+            icon: z.enum(['github', 'x', 'website']).optional(),
+          }),
+        )
+        .max(4)
+        .optional(),
     }),
 });
 
