@@ -13,8 +13,6 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "preview": "pnpm --filter @dyma/site preview",
-    "deploy:presence": "pnpm --filter @dyma/presence deploy",
-    "cf-typegen": "pnpm --filter @dyma/presence cf-typegen",
     "image:dither": "pnpm --filter @dyma/site image:dither"
   },
   "devDependencies": {
