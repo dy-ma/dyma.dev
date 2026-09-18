@@ -40,7 +40,9 @@ export function getPreviewParagraphs(article: Article, characterLimit: number) {
         block.length > 0 &&
         !block.startsWith('#') &&
         !block.startsWith('![') &&
-        !block.startsWith('```'),
+        !block.startsWith('```') &&
+        !block.startsWith('<') &&
+        !block.startsWith('|'),
     )
     .map(stripInlineMarkdown)
     .filter(Boolean);
