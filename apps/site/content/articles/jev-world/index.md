@@ -4,9 +4,9 @@ project: Jev World
 date: 2026-09-17
 summary: I asked Jev whether 131,072 points were on land or water. Its answers drew a surprisingly recognizable Earth in under two minutes.
 published: true
-image: ./hero.png
-imageAlt: Jev's completed land and water map of Earth, drawn as green and blue squares.
-imageCaption: Jev's 64 × 32 Earth, assembled from 2,048 independent land or water judgments.
+image: ./hero-blindfolded-pig.png
+imageAlt: A blindfolded pig drawing a tiled map of Earth on a large sheet of paper.
+imageCaption: Drawing the Earth from coordinates alone.
 links:
   - label: Explore the project
     href: https://github.com/dy-ma/jev-world
@@ -33,7 +33,7 @@ Jev answers 32 points per request. The app records when each response arrives, t
     <source src="/videos/jev-world/jev-world-2.mp4" type="video/mp4" />
     Your browser does not support video playback.
   </video>
-  <figcaption>The 64 × 32 recording plays back in 5.8 seconds.</figcaption>
+  <figcaption>Recorded API responses fill in the 64 × 32 map.</figcaption>
 </figure>
 
 At that resolution, the result is far from a coastline atlas. Some water becomes land and some land disappears. But the continents are there. That feels remarkable for a model built to return quick decisions from text, with no visual input at all.
