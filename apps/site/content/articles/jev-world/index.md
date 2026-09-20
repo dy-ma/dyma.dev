@@ -1,5 +1,5 @@
 ---
-headline: A model that cannot see draws Earth
+headline: Jev draws the world
 project: Jev World
 date: 2026-09-17
 summary: I asked Jev whether 131,072 points were on land or water. Its answers drew a surprisingly recognizable Earth in under two minutes.
